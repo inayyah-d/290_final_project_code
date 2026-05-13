@@ -20,7 +20,7 @@ from core import (
     region_to_xy, GRID_SIZE, NO_FLY, ROI_CENTERS, T_FINAL, N_RUNS
 )
 
-ALPHA  = 0.4
+ALPHA  = 0.2
 OUTDIR = "./outputs"
 os.makedirs(OUTDIR, exist_ok=True)
 

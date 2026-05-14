@@ -1,82 +1,31 @@
-# Decentralized Ergodic Coverage with Coordination
-
-**EE290 Final Project — Spring 2026**
-**Inayyah Don Nazwim**
-
-Extends Mendoza et al. (2026) decentralized ergodic coverage framework with a coordination-aware target distribution modification that reduces spatial redundancy across UAV agents.
-
----
+# EE290 Final Project — Coordination-Aware Ergodic Coverage
+Extension of Mendoza et al. (2026) decentralized ergodic coverage with a coordination term that reduces spatial redundancy across UAV agents.
 
 ## Setup
-
 ```bash
 pip install numpy matplotlib scikit-learn scipy
 ```
 
----
-
 ## Files
+- `core.py` — environment, GP belief updates, REMC policy, and simulation loop shared across all scripts
+- `simulation_main.py` — main experiment comparing baseline vs V1 vs V2
+- `experiment_tau_sweep.py` — varies belief/policy update frequency τ
+- `experiment_scalability.py` — varies team size M
 
-| File | Description |
-|---|---|
-| `core.py` | Shared environment, GP, REMC, and simulation loop. Import by all other files. |
-| `simulation_main.py` | Main comparison: Baseline vs. V1 vs. V2. Produces regret, overlap, heatmap, and ROI discovery figures. |
-| `experiment_tau_sweep.py` | Varies belief/policy update period τ across coordination conditions. |
-| `experiment_scalability.py` | Varies team size M ∈ {2, 3, 4, 6} for baseline and V2. |
+Outputs saved to `./outputs/`.
 
-All outputs saved to `./outputs/`.
-
----
-
-## How to run
-
-**Main comparison (start here):**
+## Running
 ```bash
-python simulation_main.py
+python simulation_main.py        # main results
+python experiment_tau_sweep.py   # tau experiment
+python experiment_scalability.py # scalability
 ```
 
-**Tau sweep (Mendoza feedback experiment):**
-```bash
-python experiment_tau_sweep.py
-```
+## Methods
+**Baseline:** Mendoza et al. Algorithm 1 unmodified (α=0)
 
-**Scalability study:**
-```bash
-python experiment_scalability.py
-```
+**V1:** subtracts average neighbor empirical coverage from each UAV's belief target before computing its policy
 
----
+**V2:** same as V1 but weighted by `(1 - rho_bar(r))` so high-importance regions are protected from being down-weighted
 
-## Methods summary
-
-**Baseline:** Mendoza et al. (2026) Algorithm 1, unmodified.
-
-**V1 — Original coordination term:**
-```
-phi_coord(r) = phi_bar(r) - alpha * avg_j[rho_hat_j(r)] * ||phi_bar||_1
-rho_bar = normalize(clip(phi_coord, 1e-8))
-```
-
-**V2 — Importance-weighted coordination term:**
-```
-phi_coord(r) = phi_bar(r) - alpha * (1 - rho_bar(r)) * avg_j[rho_hat_j(r)] * ||phi_bar||_1
-rho_bar = normalize(clip(phi_coord, 1e-8))
-```
-The `(1 - rho_bar(r))` weight protects high-importance regions from being down-weighted, removing the coverage artifact present in V1.
-
----
-
-## Parameters
-
-| Parameter | Value |
-|---|---|
-| Grid size | 8×8 (64 regions) |
-| UAVs (default) | 3 |
-| ROIs | 4 Gaussian centers at (2,2), (2,5), (5,2), (5,5) |
-| No-fly zones | 2×2 center block |
-| Timesteps | 600 |
-| τGP = τP | 20 (default) |
-| R_comm | 2.5 grid cells |
-| R_sense | 1.5 grid cells |
-| α (coordinated) | 0.4 (default) |
-| Seeds per condition | 5 |
+Default parameters: 8×8 grid, M=3 UAVs, T=600 steps, τ=20, α=0.2, R_comm=2.5, R_sense=1.5, 5 seeds
